@@ -150,7 +150,19 @@ for k in d:
 L = [1,2,3,4,5]
 print (L[-1])
 print (L[-2])
-	
+
+def changeZero(L):
+	for x in range(len(L)):
+		if L[x] == 0:
+			L[x] = -100
+
+def changeBack(L):
+	for x in range(len(L)):
+		if L[x] == 100:
+			L[x] = 0
+L = [0,-23,0,-45,0,-35]
+changeZero(L)
+print (L)	
 
 '''
 json.dumps() python object -> str

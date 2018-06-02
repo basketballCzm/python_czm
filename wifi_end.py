@@ -10,7 +10,7 @@ import json
 import re
 
 trainingSet = []
-wifiNum = 80
+wifiNum = 8
 
 #加载数据
 def loadDataset(filename, trainingSet=[]):
@@ -44,29 +44,55 @@ def loadDataset(filename, trainingSet=[]):
 def euclideanDistance(instance1, instance2, length):
 	distance = 0
 	for x in range(length):
-		if (instance1[x] == 0 & instance2[x] <-70) | (instance1[x] < -70 & instance2[x] == 0):
-			distance += 0
-		else:
-			distance += pow((instance1[x] - instance2[x]), 2)
-		'''
-		if (instance1[x] <= 70 & instance2[x] == 0) | (instance1[x] == 0 & instance2[x] <= 70):
-			distance += 0
-		else:
-		'''
+		distance += pow((instance1[x] - instance2[x]), 2)
 	return math.sqrt(distance)
+
+def changeZero(L):
+	for x in range(len(L)-1):
+		if L[x] == 0:
+			L[x] = -100
+
+def changeBack(L):
+	for x in range(len(L)-1):
+		if L[x] == -100:
+			L[x] = 0
 
 #得到K个最近邻的数据信号组
 def getNeighbors(trainingSet, testInstance, k):
 	distance = []
 	length = len(testInstance) - 1
 	for x in range(len(trainingSet)):
+		'''
 		dist = euclideanDistance(testInstance, trainingSet[x], length)
 		#这里相当于是添加了很多元组，然后每个元组中又存在一个list和dist
 		distance.append((trainingSet[x], dist))
+		'''
+		changeZero(trainingSet[x])
+		changeZero(testInstance)
+		#对比最强的AP站点信号
+		if trainingSet[x].index(max(trainingSet[x][0:8])) == testInstance.index(max(testInstance[0:8])):
+			changeBack(trainingSet[x])
+			changeBack(testInstance)
+			dist = euclideanDistance(testInstance, trainingSet[x], length)
+			#这里相当于是添加了很多元组，然后每个元组中又存在一个list和dist
+			distance.append((trainingSet[x], dist))
+		else:
+			changeBack(trainingSet[x])
+			changeBack(testInstance)
+			distance.append((trainingSet[x], float("inf")))
 	distance.sort(key=operator.itemgetter(1))
 	neighbors = []
 	for x in range(k):
 		neighbors.append(distance[x][0])
+	'''
+	sumX = 0
+	sumY = 0
+	for x in range(k):
+		sumX = sumX + int(neighbors[x][-2])
+		sumY = sumY + int(neighbors[x][-1])
+	neighbors[0][-2] = sumX
+	neighbors[0][-1] = sumY
+	'''
 	return neighbors
 
 #对数据K组数据进行数据处理
@@ -124,8 +150,6 @@ def serviceInit(address, port):
 
 
 def main():
-	loadDataset('wifi_data_new_new.txt',trainingSet)
+	loadDataset('wifi_data_12.txt',trainingSet)
 	serviceInit('172.18.39.19',6666)
 main()
-
-
